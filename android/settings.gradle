@@ -1,0 +1,3 @@
+rootProject.name = 'NativeCanvasTest3'
+
+include ':app'

@@ -29,12 +29,16 @@ export default function renderCanvas(width=200, height=200) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
+        function drawImages() {
+            ctx.drawImage(img, mouse.x, mouse.y);
+        }
+
         function drawWorld() {
             clearCanvas();
-
-            ctx.drawImage(img, mouse.x, mouse.y);
-
+            drawImages();
             drawParticles(ctx);
+
+            window.requestAnimationFrame(drawWorld);
         }
 
         canvas.addEventListener('touchend', (e) => {
@@ -54,10 +58,6 @@ export default function renderCanvas(width=200, height=200) {
         canvas.addEventListener('touchmove', (e) => {
             mouse.x = e.touches[0].screenX;
             mouse.y = e.touches[0].screenY;
-
-            if (dragging) {
-                drawWorld();
-            }
         });
 
         let init = [];
@@ -100,7 +100,7 @@ export default function renderCanvas(width=200, height=200) {
             }
         }
 
-        setInterval(drawWorld, 30);
+        window.requestAnimationFrame(drawWorld);
     } catch (err) {
         console.log(`ERROR: ${err}`);
     }

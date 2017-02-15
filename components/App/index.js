@@ -1,17 +1,24 @@
 import React, { Component } from 'react';
 import {
-    AppRegistry,
     StyleSheet,
     Text,
     View,
+    Dimensions
 } from 'react-native';
-import App from './components/App';
+import Canvas from '../Canvas';
+import renderCanvas from '../../modules/Render';
 
-export default class NativeCanvasTest3 extends Component {
+const { width, height } = Dimensions.get('window');
+
+export default class App extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <App />
+                <Canvas
+                    context={{message: 'Hello World'}}
+                    render={renderCanvas}
+                    style={{backgroundColor: 'red'}}
+                />
             </View>
         );
     }
@@ -25,5 +32,3 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5FCFF'
     }
 });
-
-AppRegistry.registerComponent('NativeCanvasTest3', () => NativeCanvasTest3);

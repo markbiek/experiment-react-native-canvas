@@ -1,13 +1,24 @@
 import React, { Component } from 'react';
 import {
     View,
-    WebView
+    WebView,
+    Dimensions
 } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export default class Canvas extends Component {
     render () {
         var contextString = JSON.stringify(this.props.context);
         var renderString = this.props.render.toString();
+        var canvasWidth = width;
+        var canvasHeight = height;
+
+        //Default is fullscreen = true
+        if (this.props.hasOwnProperty('fullscreen') && !this.props.fullscreen) {
+            canvasWidth = this.props.width;
+            canvasHeight = this.props.height;
+        }
 
         const html = `<style>
 * {
@@ -22,7 +33,7 @@ canvas {
 <canvas></canvas>
 <script>
     var canvas = document.querySelector('canvas');
-    (${renderString}).call(${contextString}, canvas, ${this.props.width}, ${this.props.height});
+    (${renderString}).call(${contextString}, canvas, ${canvasWidth}, ${canvasHeight});
 </script>`;
 
         return (
@@ -33,7 +44,7 @@ canvas {
                     source={{html: html}}
                     opaque={false}
                     underlayColor={'transparent'}
-                    style={this.props.style}
+                    style={{height: height, width: width, ...this.props.style}}
                 />
             </View>
         );

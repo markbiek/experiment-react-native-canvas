@@ -11,8 +11,8 @@ export default class Canvas extends Component {
     render () {
         var contextString = JSON.stringify(this.props.context);
         var renderString = this.props.render.toString();
-        var canvasWidth = width;
-        var canvasHeight = height;
+        var canvasWidth = width - 100;
+        var canvasHeight = height - 100;
 
         //Default is fullscreen = true
         if (this.props.hasOwnProperty('fullscreen') && !this.props.fullscreen) {
@@ -29,11 +29,27 @@ canvas {
     position: absolute;
     transform: translateZ(0);
 }
+#console {
+    width: 95%;
+    height: 100px;
+    margin: 0 auto;
+    border: 1px solid black;
+    background: white;
+    font-size: 8;
+    overflow: scroll;
+}
 </style>
+<div id="console"></div>
 <canvas></canvas>
 <script>
-    var canvas = document.querySelector('canvas');
-    (${renderString}).call(${contextString}, canvas, ${canvasWidth}, ${canvasHeight});
+    console.log = function(msg) {
+        var c = document.getElementById('console');
+        var html = c.innerHTML;
+
+        c.innerHTML += msg + '<br />';
+    };
+
+    (${renderString}).call(${contextString}, ${canvasWidth}, ${canvasHeight});
 </script>`;
 
         return (
@@ -44,6 +60,7 @@ canvas {
                     source={{html: html}}
                     opaque={false}
                     underlayColor={'transparent'}
+                    scrollEnabled={false}
                     style={{height: height, width: width, ...this.props.style}}
                 />
             </View>

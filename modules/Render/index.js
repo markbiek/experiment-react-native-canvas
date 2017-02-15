@@ -1,98 +1,67 @@
-export default function renderCanvas(canvas, width=200, height=200) {
-    //alert(`${width}, ${height}`);
-    //alert(this.message);
-    // Canvas demo is from here: http://codepen.io/antoniskamamis/pen/ECrKd
-    var ctx = canvas.getContext('2d'),
-        particles = [],
-        patriclesNum = 50,
-        w = width,
-        h = height,
-        colors = ['#f35d4f','#f36849','#c0d988','#6ddaf1','#f1e85b'];
+export default function renderCanvas(width=200, height=200) {
+    try {
+        console.log(`renderCanvas: ${width}, ${height}`);
 
-    canvas.width = width;
-    canvas.height = height;
-    canvas.style.left = (window.innerWidth - width)/2+'px';
+        var canvas = document.querySelector('canvas');
+        var ctx = canvas.getContext('2d');
+        var w = width;
+        var h = height;
+        var colors = ['#f35d4f', '#f36849', '#c0d988', '#6ddaf1', '#f1e85b'];
 
-    if(window.innerHeight>height)
-        canvas.style.top = (window.innerHeight - height)/2+'px';
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.left = (window.innerWidth - width) / 2 + 'px';
 
-    function Factory(){  
-        this.x =  Math.round( Math.random() * w);
-        this.y =  Math.round( Math.random() * h);
-        this.rad = Math.round( Math.random() * 1) + 1;
-        this.rgba = colors[ Math.round( Math.random() * 3) ];
-        this.vx = Math.round( Math.random() * 3) - 1.5;
-        this.vy = Math.round( Math.random() * 3) - 1.5;
-    }
+        if (window.innerHeight > height) {
+            canvas.style.top = (window.innerHeight - height) / 2 + 'px';
+        }
+        var mouse = {x: 0, y: 0};
 
-    function draw(){
-        ctx.clearRect(0, 0, w, h);
-        ctx.globalCompositeOperation = 'lighter';
-        for(var i = 0;i < patriclesNum; i++){
-            var temp = particles[i];
-            var factor = 1;
+        var start_events = ["mousedown", "touchstart"];
+        var move_events = ["mousemove", "touchmove"];
+        var end_events = ["mouseup", "touchend"];
 
-            for(var j = 0; j<patriclesNum; j++){
+        move_events.forEach(function (event) {
+            canvas.addEventListener(event, function (e) {
+                console.log(`move: ${event}`);
 
-                var temp2 = particles[j];
-                ctx.linewidth = 0.5;
+                let touch = e.touches[0];
 
-                if(temp.rgba == temp2.rgba && findDistance(temp, temp2)<50){
-                    ctx.strokeStyle = temp.rgba;
-                    ctx.beginPath();
-                    ctx.moveTo(temp.x, temp.y);
-                    ctx.lineTo(temp2.x, temp2.y);
-                    ctx.stroke();
-                    factor++;
-                }
-            }
+                mouse.x = touch.screenX;
+                mouse.y = touch.screenY;
+            }, false);
+        });
 
+        ctx.lineWidth = 5;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'black';
 
-            ctx.fillStyle = temp.rgba;
-            ctx.strokeStyle = temp.rgba;
+        start_events.forEach(function (event) {
+            canvas.addEventListener(event, function (e) {
+                ctx.beginPath();
+                ctx.moveTo(mouse.x, mouse.y);
 
-            ctx.beginPath();
-            ctx.arc(temp.x, temp.y, temp.rad*factor, 0, Math.PI*2, true);
-            ctx.fill();
-            ctx.closePath();
+                move_events.forEach(function (me) {
+                    canvas.addEventListener(me, onPaint, false);
+                });
+            }, false);
+        });
 
-            ctx.beginPath();
-            ctx.arc(temp.x, temp.y, (temp.rad+5)*factor, 0, Math.PI*2, true);
+        end_events.forEach(function (event) {
+            canvas.addEventListener(event, function (e) {
+                move_events.forEach(function (me) {
+                    canvas.removeEventListener(me, onPaint, false);
+                });
+            }, false);
+        });
+
+        var onPaint = function () {
+            console.log(`onPaint: ${mouse.x}, ${mouse.y}`)
+            ctx.lineTo(mouse.x, mouse.y);
             ctx.stroke();
-            ctx.closePath();
-
-
-            temp.x += temp.vx;
-            temp.y += temp.vy;
-
-            if(temp.x > w)temp.x = 0;
-            if(temp.x < 0)temp.x = w;
-            if(temp.y > h)temp.y = 0;
-            if(temp.y < 0)temp.y = h;
-        }
+        };
+    } catch (err) {
+        console.log(`ERROR: ${err}`);
     }
-
-    function findDistance(p1,p2){  
-        return Math.sqrt( Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2) );
-    }
-
-    window.requestAnimFrame = (function(){
-        return  window.requestAnimationFrame       ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame    ||
-            function( callback ){
-                window.setTimeout(callback, 1000 / 60);
-            };
-    })();
-
-    (function init(){
-        for(var i = 0; i < patriclesNum; i++){
-            particles.push(new Factory);
-        }
-    })();
-
-    (function loop(){
-        draw();
-        requestAnimFrame(loop);
-    })();
 }

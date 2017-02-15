@@ -27,7 +27,7 @@ export default class NativeCanvasTest3 extends Component {
                 <Canvas
                     context={{message: 'Hello World'}}
                     render={renderCanvas}
-                    style={{backgroundColor: '#f0f0f0'}}
+                    style={{backgroundColor: 'red'}}
                 />
             </View>
         );

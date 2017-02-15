@@ -2,11 +2,14 @@ export default function renderCanvas(width=200, height=200) {
     try {
         console.log(`renderCanvas: ${width}, ${height}`);
 
-        var canvas = document.querySelector('canvas');
-        var ctx = canvas.getContext('2d');
-        var w = width;
-        var h = height;
-        var colors = ['#f35d4f', '#f36849', '#c0d988', '#6ddaf1', '#f1e85b'];
+        let canvas = document.querySelector('canvas');
+        let ctx = canvas.getContext('2d');
+
+        var img = new Image();
+        img.onload = () => {
+            ctx.drawImage(img, width / 2, height / 2);
+        };
+        img.src = 'http://i.imgur.com/MLj6Nll.png';
 
         canvas.width = width;
         canvas.height = height;
@@ -15,52 +18,36 @@ export default function renderCanvas(width=200, height=200) {
         if (window.innerHeight > height) {
             canvas.style.top = (window.innerHeight - height) / 2 + 'px';
         }
-        var mouse = {x: 0, y: 0};
 
-        var start_events = ["mousedown", "touchstart"];
-        var move_events = ["mousemove", "touchmove"];
-        var end_events = ["mouseup", "touchend"];
-
-        move_events.forEach(function (event) {
-            canvas.addEventListener(event, function (e) {
-                console.log(`move: ${event}`);
-
-                let touch = e.touches[0];
-
-                mouse.x = touch.screenX;
-                mouse.y = touch.screenY;
-            }, false);
-        });
-
-        ctx.lineWidth = 5;
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = 'black';
-
-        start_events.forEach(function (event) {
-            canvas.addEventListener(event, function (e) {
-                ctx.beginPath();
-                ctx.moveTo(mouse.x, mouse.y);
-
-                move_events.forEach(function (me) {
-                    canvas.addEventListener(me, onPaint, false);
-                });
-            }, false);
-        });
-
-        end_events.forEach(function (event) {
-            canvas.addEventListener(event, function (e) {
-                move_events.forEach(function (me) {
-                    canvas.removeEventListener(me, onPaint, false);
-                });
-            }, false);
-        });
-
-        var onPaint = function () {
-            console.log(`onPaint: ${mouse.x}, ${mouse.y}`)
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
+        let dragging = false;
+        let mouse = {
+            x: width / 2,
+            y: height / 2
         };
+
+        canvas.addEventListener('touchend', (e) => {
+            mouse.x = e.touches[0].screenX;
+            mouse.y = e.touches[0].screenY;
+
+            dragging = false;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            mouse.x = e.touches[0].screenX;
+            mouse.y = e.touches[0].screenY;
+
+            dragging = true;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            mouse.x = e.touches[0].screenX;
+            mouse.y = e.touches[0].screenY;
+
+            if (dragging) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, mouse.x, mouse.y);
+            }
+        });
     } catch (err) {
         console.log(`ERROR: ${err}`);
     }
